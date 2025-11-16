@@ -85,11 +85,11 @@ Edit file `.env` dan sesuaikan konfigurasi database:
 ```env
 DB_CONNECTION=sqlite
 # Atau untuk MySQL/PostgreSQL:
-# DB_CONNECTION=mysql
-# DB_HOST=127.0.0.1
-# DB_PORT=3306
-# DB_DATABASE=sireda
-# DB_USERNAME=root
+# DB_CONNECTION=
+# DB_HOST=
+# DB_PORT=
+# DB_DATABASE=
+# DB_USERNAME=
 # DB_PASSWORD=
 ```
 
@@ -150,7 +150,7 @@ MAIL_PORT=1025
 MAIL_USERNAME=null
 MAIL_PASSWORD=null
 MAIL_ENCRYPTION=null
-MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_ADDRESS=
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
@@ -159,23 +159,10 @@ MAIL_FROM_NAME="${APP_NAME}"
 Gunakan artisan command atau seeder:
 
 ```bash
-php artisan db:seed --class=AdminUserSeeder
+
 ```
 
 Atau buat manual melalui tinker:
-
-```bash
-php artisan tinker
-```
-
-```php
-User::create([
-    'name' => 'Admin',
-    'email' => 'admin@example.com',
-    'password' => Hash::make('password'),
-    'role' => 'admin',
-]);
-```
 
 ## 📖 Cara Menggunakan
 
