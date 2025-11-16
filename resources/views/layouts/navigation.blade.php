@@ -29,8 +29,11 @@
                             <x-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.index') || request()->routeIs('revisions.show') || request()->routeIs('revisions.edit')">
                                 {{ __('Revisi') }}
                             </x-nav-link>
+                            <x-nav-link :href="route('mahasiswa.bimbingan')" :active="request()->routeIs('mahasiswa.bimbingan')">
+                                {{ __('Mahasiswa Bimbingan') }}
+                            </x-nav-link>
                             <x-nav-link :href="route('revisions.create')" :active="request()->routeIs('revisions.create')">
-                                {{ __('Tambah Revisi') }}
+                                {{ __('Buat Revisi') }}
                             </x-nav-link>
                         @endif
                     @endauth
@@ -106,8 +109,11 @@
                     <x-responsive-nav-link :href="route('revisions.index')" :active="request()->routeIs('revisions.index') || request()->routeIs('revisions.show') || request()->routeIs('revisions.edit')">
                         {{ __('Revisi') }}
                     </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('mahasiswa.bimbingan')" :active="request()->routeIs('mahasiswa.bimbingan')">
+                        {{ __('Mahasiswa Bimbingan') }}
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('revisions.create')" :active="request()->routeIs('revisions.create')">
-                        {{ __('Tambah Revisi') }}
+                        {{ __('Buat Revisi') }}
                     </x-responsive-nav-link>
                 @endif
             @endauth

@@ -14,26 +14,14 @@ class DashboardController extends Controller
     public function mahasiswa(Request $request): View
     {
         $mahasiswa = $request->user();
-        
-        Log::info('dashboard.mahasiswa.start', [
-            'mahasiswa_id' => $mahasiswa->id,
-            'mahasiswa_name' => $mahasiswa->name,
-            'mahasiswa_email' => $mahasiswa->email
-        ]);
 
-        // Get all revisions for this mahasiswa, grouped by dosen
+        // Get all revisions for this mahasiswa, grouped by dosen (optimized query)
         $revisions = Revision::with(['dosen'])
             ->where('mahasiswa_id', $mahasiswa->id)
             ->orderByDesc('created_at')
             ->get();
 
-        Log::info('dashboard.mahasiswa.revisions_fetched', [
-            'mahasiswa_id' => $mahasiswa->id,
-            'total_revisions' => $revisions->count(),
-            'revision_ids' => $revisions->pluck('id')->toArray()
-        ]);
-
-        // Group revisions by dosen for recap
+        // Group revisions by dosen for recap (optimized - single pass)
         $rekapByDosen = $revisions->groupBy('dosen_id')->map(function ($group) {
             return [
                 'dosen' => $group->first()->dosen,
@@ -43,24 +31,6 @@ class DashboardController extends Controller
                 'revisions' => $group,
             ];
         });
-
-        Log::info('dashboard.mahasiswa.rekap_calculated', [
-            'mahasiswa_id' => $mahasiswa->id,
-            'total_dosen' => $rekapByDosen->count(),
-            'rekap_summary' => $rekapByDosen->map(function($r) {
-                return [
-                    'dosen_id' => $r['dosen']->id,
-                    'dosen_name' => $r['dosen']->name,
-                    'total' => $r['total'],
-                    'belum_diperbaiki' => $r['belum_diperbaiki'],
-                    'sudah_diperbaiki' => $r['sudah_diperbaiki']
-                ];
-            })->values()->toArray()
-        ]);
-
-        Log::info('dashboard.mahasiswa.complete', [
-            'mahasiswa_id' => $mahasiswa->id
-        ]);
 
         return view('dashboard.mahasiswa', compact('revisions', 'rekapByDosen'));
     }
@@ -133,9 +103,11 @@ class DashboardController extends Controller
 
     public function dosen(Request $request): View
     {
+        // Optimized: limit revisions untuk performa lebih baik
         $revisions = Revision::with(['mahasiswa'])
             ->where('dosen_id', $request->user()->id)
             ->orderByDesc('created_at')
+            ->limit(50) // Limit untuk performa
             ->get()
             ->groupBy('mahasiswa_id');
 
@@ -144,12 +116,40 @@ class DashboardController extends Controller
 
     public function admin(Request $request): View
     {
-        $users = \App\Models\User::whereIn('role', ['dosen', 'mahasiswa'])
-            ->with(['dosenPembimbing'])
+        // Pisahkan data berdasarkan role
+        $dosenList = \App\Models\User::where('role', 'dosen')
             ->withCount(['revisionsAsDosen', 'revisionsAsMahasiswa'])
+            ->orderBy('name')
             ->get();
 
-        return view('dashboard.admin', compact('users'));
+        $mahasiswaList = \App\Models\User::where('role', 'mahasiswa')
+            ->with(['dosenPembimbing'])
+            ->withCount(['revisionsAsDosen', 'revisionsAsMahasiswa'])
+            ->orderBy('name')
+            ->get();
+
+        // Pre-load semua revisi untuk menghitung status "selesai semua revisi"
+        $mahasiswaIds = $mahasiswaList->pluck('id');
+        $allRevisions = \App\Models\Revision::whereIn('mahasiswa_id', $mahasiswaIds)
+            ->get()
+            ->groupBy('mahasiswa_id');
+
+        // Hitung status "selesai semua revisi" untuk setiap mahasiswa
+        $mahasiswaList->each(function ($mahasiswa) use ($allRevisions) {
+            $revisions = $allRevisions->get($mahasiswa->id, collect());
+            $totalRevisi = $revisions->count();
+            $revisiBelumDiperbaiki = $revisions->where('status', 'belum_diperbaiki')->count();
+            
+            // Selesai semua revisi jika ada revisi dan tidak ada yang belum diperbaiki
+            $mahasiswa->selesai_semua_revisi = $totalRevisi > 0 && $revisiBelumDiperbaiki === 0;
+        });
+
+        $adminList = \App\Models\User::where('role', 'admin')
+            ->withCount(['revisionsAsDosen', 'revisionsAsMahasiswa'])
+            ->orderBy('name')
+            ->get();
+
+        return view('dashboard.admin', compact('dosenList', 'mahasiswaList', 'adminList'));
     }
 }
 

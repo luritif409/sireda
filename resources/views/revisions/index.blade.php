@@ -9,7 +9,7 @@
         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
         </svg>
-        Tambah Revisi
+        Buat Revisi
     </a>
 </div>
 @endsection
@@ -17,6 +17,16 @@
 @section('content')
 <div class="py-6">
 	<div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+		@if(session('success'))
+			<div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+				<span class="block sm:inline">{{ session('success') }}</span>
+			</div>
+		@endif
+		@if(session('error'))
+			<div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+				<span class="block sm:inline">{{ session('error') }}</span>
+			</div>
+		@endif
 		<!-- Filter -->
 		<div class="bg-white rounded-lg shadow p-4 mb-6">
 			<form method="GET" action="{{ route('revisions.index') }}" class="flex flex-wrap gap-4">
@@ -61,10 +71,29 @@
 											@endif
 										</div>
 									</div>
-									<span class="px-2 py-1 text-xs font-medium rounded
-										{{ $rev->status === 'belum_diperbaiki' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
-										{{ ucfirst(str_replace('_',' ', $rev->status)) }}
-									</span>
+									<div class="flex flex-col items-end gap-1">
+										@if($rev->status === 'belum_diperbaiki')
+											<form action="{{ route('revisions.update-status', $rev) }}" method="POST" class="inline-block">
+												@csrf
+												@method('PATCH')
+												<button type="submit" 
+													onclick="return confirm('Apakah Anda yakin ingin menandai revisi ini sebagai sudah diperbaiki?')"
+													class="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-md bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 transition shadow-sm">
+													<svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+														<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+													</svg>
+													Tandai Selesai
+												</button>
+											</form>
+											<span class="px-2 py-1 text-xs font-medium rounded bg-red-100 text-red-800 mt-1">
+												{{ ucfirst(str_replace('_',' ', $rev->status)) }}
+											</span>
+										@else
+											<span class="px-2 py-1 text-xs font-medium rounded bg-green-100 text-green-800">
+												{{ ucfirst(str_replace('_',' ', $rev->status)) }}
+											</span>
+										@endif
+									</div>
 								</div>
 								<div class="mt-3 space-y-1">
 									<div class="text-sm">

@@ -16,8 +16,6 @@ class RevisiController extends Controller
 {
     public function index(Request $request): View
     {
-        Log::info('revisions.index', ['user_id' => $request->user()->id, 'step' => 'start']);
-
         $query = Revision::with(['mahasiswa', 'dosen'])->orderByDesc('created_at');
         if ($request->filled('tahap')) {
             $query->where('tahap', $request->string('tahap'));
@@ -178,6 +176,70 @@ class RevisiController extends Controller
     {
         $revision = Revision::with(['mahasiswa', 'dosen'])->where('token', $token)->firstOrFail();
         return view('revisions.share', compact('revision'));
+    }
+
+    public function mahasiswaBimbingan(Request $request): View
+    {
+        // Get all mahasiswa yang dibimbing oleh dosen yang login
+        $mahasiswaList = User::where('role', 'mahasiswa')
+            ->where('dosen_pembimbing_id', $request->user()->id)
+            ->orderBy('name')
+            ->get();
+
+        // Pre-load semua revisi untuk semua mahasiswa sekaligus (menghindari N+1 query)
+        $mahasiswaIds = $mahasiswaList->pluck('id');
+        $allRevisions = Revision::whereIn('mahasiswa_id', $mahasiswaIds)
+            ->with('dosen')
+            ->orderByDesc('created_at')
+            ->get()
+            ->groupBy('mahasiswa_id');
+
+        // Attach revisions dan hitung statistik untuk setiap mahasiswa
+        $mahasiswaList->each(function ($mahasiswa) use ($allRevisions) {
+            $revisions = $allRevisions->get($mahasiswa->id, collect());
+            
+            // Attach revisions collection
+            $mahasiswa->revisions = $revisions;
+            
+            // Pre-calculate statistics (menghindari query di view)
+            $mahasiswa->total_revisi = $revisions->count();
+            $mahasiswa->revisi_belum_diperbaiki = $revisions->where('status', 'belum_diperbaiki')->count();
+            $mahasiswa->revisi_sudah_diperbaiki = $revisions->where('status', 'sudah_diperbaiki')->count();
+        });
+
+        return view('revisions.mahasiswa-bimbingan', compact('mahasiswaList'));
+    }
+
+    public function updateStatus(Request $request, Revision $revision): RedirectResponse
+    {
+        $dosen = $request->user();
+        
+        // Verify that the logged-in user is either:
+        // 1. The dosen who created this revision, OR
+        // 2. The dosen pembimbing of the mahasiswa
+        $isCreator = $dosen->id === $revision->dosen_id;
+        $isPembimbing = $revision->mahasiswa->dosen_pembimbing_id === $dosen->id;
+        
+        if (!$isCreator && !$isPembimbing) {
+            abort(403, 'Anda tidak memiliki izin untuk mengubah status revisi ini.');
+        }
+
+        if ($revision->status === 'belum_diperbaiki') {
+            $revision->status = 'sudah_diperbaiki';
+            $revision->save();
+
+            Log::info('revisions.update_status', [
+                'user_id' => $request->user()->id,
+                'revision_id' => $revision->id,
+                'new_status' => 'sudah_diperbaiki',
+                'is_creator' => $isCreator,
+                'is_pembimbing' => $isPembimbing
+            ]);
+
+            return redirect()->back()->with('success', 'Status revisi berhasil diperbarui menjadi sudah diperbaiki.');
+        }
+
+        return redirect()->back()->with('error', 'Status revisi tidak dapat diubah.');
     }
 
     private function authorizeDosen(int $currentUserId, int $dosenId): void

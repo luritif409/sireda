@@ -73,8 +73,8 @@
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                             onchange="toggleMahasiswaFields()">
                             <option value="">Pilih Role</option>
-                            <option value="mahasiswa" {{ old('role') === 'mahasiswa' ? 'selected' : '' }}>Mahasiswa (untuk direvisi dosen)</option>
-                            <option value="dosen" {{ old('role') === 'dosen' ? 'selected' : '' }}>Dosen (pembimbing)</option>
+                            <option value="mahasiswa" {{ old('role', $defaultRole ?? '') === 'mahasiswa' ? 'selected' : '' }}>Mahasiswa (untuk direvisi dosen)</option>
+                            <option value="dosen" {{ old('role', $defaultRole ?? '') === 'dosen' ? 'selected' : '' }}>Dosen (pembimbing)</option>
                         </select>
                         @error('role')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
@@ -178,9 +178,8 @@ document.querySelector('select[name="role"]').addEventListener('change', functio
 // Initialize required state on load
 document.addEventListener('DOMContentLoaded', function() {
     const roleSelect = document.querySelector('select[name="role"]');
-    if (roleSelect) {
-        const event = new Event('change');
-        roleSelect.dispatchEvent(event);
+    if (roleSelect && roleSelect.value) {
+        toggleMahasiswaFields();
     }
 });
 </script>

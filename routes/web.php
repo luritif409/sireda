@@ -39,6 +39,8 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'role:dosen'])->group(function () {
     Route::resource('revisions', RevisiController::class);
     Route::get('revisions/{revision}/pdf', [RevisiController::class, 'exportPDF'])->name('revisions.pdf');
+    Route::patch('revisions/{revision}/update-status', [RevisiController::class, 'updateStatus'])->name('revisions.update-status');
+    Route::get('mahasiswa-bimbingan', [RevisiController::class, 'mahasiswaBimbingan'])->name('mahasiswa.bimbingan');
     Route::get('/dashboard-dosen', [DashboardController::class, 'dosen'])->name('dashboard.dosen');
 });
 

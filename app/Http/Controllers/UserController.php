@@ -50,11 +50,13 @@ class UserController extends Controller
         return view('users.index', compact('users'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         // Provide list of dosen for selecting pembimbing when creating mahasiswa
         $dosenList = User::where('role', 'dosen')->orderBy('name')->get();
-        return view('users.create', compact('dosenList'));
+        // Get default role from query parameter if provided
+        $defaultRole = $request->query('role', '');
+        return view('users.create', compact('dosenList', 'defaultRole'));
     }
 
     public function store(Request $request): RedirectResponse

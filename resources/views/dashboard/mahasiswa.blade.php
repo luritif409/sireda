@@ -3,8 +3,8 @@
 @section('header')
 <div class="flex items-center justify-between">
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Dashboard Mahasiswa') }}
-    </h2>
+    {{ __('Dashboard Mahasiswa') }}
+</h2>
     @if($revisions->count() > 0)
     <a href="{{ route('dashboard.mahasiswa.export-all-revisions-pdf') }}" 
        class="inline-flex items-center px-4 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 shadow-md transition">
@@ -103,7 +103,7 @@
 			</div>
 			<div class="p-6">
 				@if($revisions->count() > 0)
-				<div class="grid md:grid-cols-2 gap-4">
+		<div class="grid md:grid-cols-2 gap-4">
 					@foreach($revisions as $rev)
 					<div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition">
 						<div class="flex justify-between items-start mb-3">
