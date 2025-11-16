@@ -102,18 +102,8 @@
 						@enderror
 					</div>
 
-					<div>
-						<label class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti (PDF, opsional)</label>
-						<input type="file" name="bukti_file" accept="application/pdf"
-							class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-						<p class="mt-1 text-xs text-gray-500">Maksimal 5MB, format PDF</p>
-						@error('bukti_file')
-							<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-						@enderror
-					</div>
-
 					<div class="pt-4 flex items-center gap-3 border-t border-gray-200">
-						<button type="submit" class="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold shadow-md">
+						<button type="submit" class="px-5 py-2.5 bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-semibold shadow-md">
 							Simpan Revisi
 						</button>
 						<a href="{{ route('revisions.index') }}" class="px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 text-sm font-semibold">

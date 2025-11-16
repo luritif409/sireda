@@ -71,24 +71,8 @@
 						@enderror
 					</div>
 					
-					<div>
-						<label class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti (PDF, opsional)</label>
-						<input type="file" name="bukti_file" accept="application/pdf"
-							class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
-						@if($revision->bukti_file_path)
-							<p class="text-xs mt-1 text-gray-600">File saat ini: 
-								<a href="{{ Storage::url($revision->bukti_file_path) }}" target="_blank" class="text-blue-600 hover:underline">
-									{{ basename($revision->bukti_file_path) }}
-								</a>
-							</p>
-						@endif
-						@error('bukti_file')
-							<p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-						@enderror
-					</div>
-					
 					<div class="pt-4 flex items-center gap-3">
-						<button type="submit" class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-semibold shadow-md hover:shadow-lg transition">
+						<button type="submit" class="inline-flex items-center px-5 py-2.5 bg-white border-2 border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 text-sm font-semibold shadow-md hover:shadow-lg transition">
 							<svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
 							</svg>
