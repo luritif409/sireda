@@ -1,0 +1,3 @@
+nama_lengkap,email,password,role,nim,judul_tugas_akhir,dosen_pembimbing
+"Ahmad Fauzi",ahmad.fauzi@example.com,password123,mahasiswa,2022001,"Judul Contoh","Dr. Budi Santoso"
+"Dr. Budi Santoso",budi.santoso@example.com,password123,dosen, , , 
